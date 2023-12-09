@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Management System</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+    .product-container {
+      margin-bottom: 20px;
+    }
+
+    .product-header {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body ng-controller="ProductController">
+<div class="container">
+    <h1><a href="index.htm">Order Management System</a></h1>
+    <h2>Product Selection</h2>
+
+    <div class="product-container" ng-repeat="product in products">
+        <div class="card">
+            <div class="card-header product-header" ng-click="toggleCollapse(product.id)">
+                {{ product.name }}
+            </div>
+            <div id="collapse{{ product.id }}" class="collapse" ng-class="{ 'show': product.collapsed }">
+                <div class="card-body">
+                    <div>
+                        <label for="quantity{{ product.id }}">Quantity:</label>
+                        <input id="quantity{{ product.id }}" type="number" min="0" ng-model="product.quantity" ng-change="calculateTotalPrice()">
+                    </div>
+                    <div>
+                        <label for="price{{ product.id }}">Price:</label>
+                        <span id="price{{ product.id }}">{{ product.price }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3>Total Price: {{ totalPrice }}</h3>
+
+    <button class="btn btn-primary" ng-click="sendToBackend()">Order!</button>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<!-- AngularJS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.2/angular.min.js"></script>
+<script src="new-order.js"></script>
+</body>
+</html>
+
+
+

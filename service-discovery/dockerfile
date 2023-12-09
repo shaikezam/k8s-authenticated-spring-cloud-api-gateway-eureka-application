@@ -1,0 +1,6 @@
+FROM alpine:edge
+RUN apk add --no-cache openjdk17
+RUN apk --no-cache add curl
+COPY target/*.jar /app/service-discovery.jar
+WORKDIR /app
+ENTRYPOINT ["java","-jar","service-discovery.jar"]

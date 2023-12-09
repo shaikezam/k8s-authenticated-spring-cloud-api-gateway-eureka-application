@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: order-service
+  datasource:
+    url: jdbc:mariadb://db:3306/orders
+    username: admin
+    password: admin
+
+  flyway:
+    url: jdbc:mariadb://db:3306/orders?currentSchema=app
+    user: admin
+    password: admin
+
+server:
+  port: 8003
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://service-discovery:8001/eureka

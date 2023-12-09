@@ -1,0 +1,69 @@
+version: "3.9"
+services:
+  api-gateway:
+    container_name: api-gateway
+    build: api-gateway
+    ports:
+      - "8000:8000"
+    networks:
+      - product-network
+
+  service-discovery:
+    container_name: service-discovery
+    build: service-discovery
+    ports:
+      - "8001:8001"
+    networks:
+      - product-network
+
+  product-service:
+    container_name: product-service
+    build: product-service
+    ports:
+      - "8002:8002"
+    networks:
+      - product-network
+    depends_on:
+      - db
+
+  order-service:
+    container_name: order-service
+    build: order-service
+    ports:
+      - "8003:8003"
+    depends_on:
+      - db
+    networks:
+      - product-network
+
+  db:
+    container_name: db
+    build: db
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: admin
+      MARIADB_USER: admin
+      MARIADB_PASSWORD: admin
+      MARIADB_DATABASE: application
+    ports:
+      - "3306:3306"
+    networks:
+      - product-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    ports:
+      - "8004:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MARIADB_ROOT_PASSWORD: admin
+    networks:
+      - product-network
+
+networks:
+  product-network:
+    external: false
+    name: product-network

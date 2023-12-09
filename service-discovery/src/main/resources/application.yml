@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: service-discovery
+
+server:
+  port: 8001
+eureka:
+  client:
+    service-url:
+      defaultZone: http://service-discovery:8001/eureka
