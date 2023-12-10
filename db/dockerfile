@@ -1,3 +1,9 @@
 FROM mariadb:10.6
 
 ADD init.sql /docker-entrypoint-initdb.d/ddl.sql
+
+# Set environment variables for MariaDB configuration
+ENV MARIADB_ROOT_PASSWORD=admin
+ENV MARIADB_USER=admin
+ENV MARIADB_PASSWORD=admin
+ENV MARIADB_DATABASE=application
