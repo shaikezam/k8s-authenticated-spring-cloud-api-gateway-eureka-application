@@ -4,6 +4,16 @@ server:
 spring:
   application:
     name: api-gateway
+#  security:
+#    oauth2:
+#      client:
+#        provider:
+#          my-provider:
+#           issuer-uri: http://keycloak:8005/auth/realms/master
+#          registration:
+#            Keycloak-spring-gateway-client:
+#              provider: my-provider
+#              client-id: spring-gateway-client
 
 eureka:
   client:
