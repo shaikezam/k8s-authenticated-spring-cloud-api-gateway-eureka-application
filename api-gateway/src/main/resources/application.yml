@@ -1,19 +1,56 @@
 server:
   port: 8000
 
+
 spring:
   application:
     name: api-gateway
+
 #  security:
 #    oauth2:
 #      client:
 #        provider:
-#          my-provider:
-#           issuer-uri: http://keycloak:8005/auth/realms/master
-#          registration:
-#            Keycloak-spring-gateway-client:
-#              provider: my-provider
-#              client-id: spring-gateway-client
+#          keycloak:
+#            issuer-uri: http://localhost:8000/auth/realms/myapp
+#        registration:
+#          keycloak:
+#            provider: keycloak
+#            client-id: my-client
+#            client-secret: JzaQy3zoFasVzbBHqYJmU4FcMTvEYWHz
+#            scope:
+#              - email
+#              - profile
+#              - roles
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            scope:
+              - openid
+              - profile
+            provider: keycloak
+            clientId: my-client
+            clientSecret: JzaQy3zoFasVzbBHqYJmU4FcMTvEYWHz
+            authorizationGrantType: authorization_code
+            redirect-uri: "{baseUrl}/oauth2/authorization/keycloak"
+        provider:
+          keycloak:
+            tokenUri: http://localhost:8000/auth/realms/myapp/protocol/openid-connect/token
+            authorizationUri: http://localhost:8000/auth/realms/myapp/protocol/openid-connect/auth
+            userInfoUri: http://localhost:8000/auth/realms/master/protocol/openid-connect/userinfo
+            #jwk-set-uri: http://localhost:8000/auth/realms/myapp/protocol/openid-connect/certs
+            userNameAttribute: name
+
+  session:
+    store-type: jdbc
+    jdbc:
+      initialize-schema: always
+
+  datasource:
+    url: jdbc:mariadb://db:3306/spring_session
+    username: admin
+    password: admin
 
 eureka:
   client:

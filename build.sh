@@ -35,9 +35,17 @@ echo "finished build db"
 #cd ../keycloak
 #docker build -t keycloak .
 #echo "finished build keycloak"
+#kubectl get events --all-namespaces  --sort-by='.metadata.creationTimestamp'
+
+cd ../k8s-resources
+echo "start build entire application"
+kubectl apply -f api-gw.yml
+kubectl apply -f service-discovery.yml
+kubectl apply -f order-service.yml
+kubectl apply -f product-service.yml
+kubectl apply -f db.yml
+kubectl apply -f phpmyadmin.yml
+kubectl apply -f keycloak.yml
+echo "finished build entire application"
 
 cd ../
-
-echo "start build entire application"
-kubectl apply -f app.yml
-echo "finished build entire application"

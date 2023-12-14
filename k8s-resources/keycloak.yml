@@ -1,176 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: api-gateway
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: api-gateway
-  template:
-    metadata:
-      labels:
-        app: api-gateway
-    spec:
-      containers:
-        - name: api-gateway
-          image: api-gateway:latest
-          imagePullPolicy: Never
-          ports:
-            - containerPort: 8000
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: api-gateway
-spec:
-  selector:
-    app: api-gateway
-  ports:
-    - protocol: TCP
-      port: 8000
-      targetPort: 8000
-  type: LoadBalancer
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: service-discovery
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: service-discovery
-  template:
-    metadata:
-      labels:
-        app: service-discovery
-    spec:
-      containers:
-        - name: service-discovery
-          image: service-discovery:latest
-          imagePullPolicy: Never
-          ports:
-            - containerPort: 8001
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: service-discovery
-spec:
-  selector:
-    app: service-discovery
-  ports:
-    - protocol: TCP
-      port: 8001
-      targetPort: 8001
-  type: LoadBalancer
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: product-service
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: product-service
-  template:
-    metadata:
-      labels:
-        app: product-service
-    spec:
-      containers:
-        - name: product-service
-          image: product-service:latest
-          imagePullPolicy: Never
-          ports:
-            - containerPort: 8002
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: product-service
-spec:
-  selector:
-    app: product-service
-  ports:
-    - protocol: TCP
-      port: 8002
-      targetPort: 8002
-  type: ClusterIP
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: order-service
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: order-service
-  template:
-    metadata:
-      labels:
-        app: order-service
-    spec:
-      containers:
-        - name: order-service
-          image: order-service:latest
-          imagePullPolicy: Never
-          ports:
-            - containerPort: 8003
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: order-service
-spec:
-  selector:
-    app: order-service
-  ports:
-    - protocol: TCP
-      port: 8003
-      targetPort: 8003
-  type: ClusterIP
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: db
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: db
-  template:
-    metadata:
-      labels:
-        app: db
-    spec:
-      containers:
-        - name: db
-          image: db:latest
-          imagePullPolicy: Never
-          ports:
-            - containerPort: 3306
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: db
-spec:
-  selector:
-    app: db
-  ports:
-    - protocol: TCP
-      port: 3306
-      targetPort: 3306
-  type: ClusterIP
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
   name: keycloak
 spec:
   replicas: 1
@@ -213,6 +43,19 @@ spec:
         - name: realm-config-volume
           configMap:
             name: keycloak-configmap
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+spec:
+  selector:
+    app: keycloak
+  ports:
+    - protocol: TCP
+      port: 8005
+      targetPort: 8080
+  type: LoadBalancer
 ---
 apiVersion: v1
 data:
@@ -305,6 +148,7 @@ data:
           }
         ],
         "client": {
+          "my-client": [],
           "realm-management": [
             {
               "id": "d31f45ec-d8bb-4dc9-8710-b5a513ca91fc",
@@ -846,6 +690,72 @@ data:
           ]
         },
         {
+          "id": "2ae04a19-fb42-4ec3-81e5-cf8f7bce9f0c",
+          "clientId": "my-client",
+          "surrogateAuthRequired": false,
+          "enabled": true,
+          "alwaysDisplayInConsole": false,
+          "clientAuthenticatorType": "client-secret",
+          "secret": "**********",
+          "redirectUris": [
+            "http://api-gw:8000/*",
+            "http://localhost:8005/*",
+            "*",
+            "http://localhost:8000/*",
+            "http://keycloak:8005/*"
+          ],
+          "webOrigins": [],
+          "notBefore": 0,
+          "bearerOnly": false,
+          "consentRequired": false,
+          "standardFlowEnabled": true,
+          "implicitFlowEnabled": false,
+          "directAccessGrantsEnabled": true,
+          "serviceAccountsEnabled": false,
+          "publicClient": false,
+          "frontchannelLogout": false,
+          "protocol": "openid-connect",
+          "attributes": {
+            "id.token.as.detached.signature": "false",
+            "saml.assertion.signature": "false",
+            "saml.force.post.binding": "false",
+            "saml.multivalued.roles": "false",
+            "saml.encrypt": "false",
+            "oauth2.device.authorization.grant.enabled": "false",
+            "backchannel.logout.revoke.offline.tokens": "false",
+            "saml.server.signature": "false",
+            "saml.server.signature.keyinfo.ext": "false",
+            "use.refresh.tokens": "true",
+            "exclude.session.state.from.auth.response": "false",
+            "oidc.ciba.grant.enabled": "false",
+            "saml.artifact.binding": "false",
+            "backchannel.logout.session.required": "true",
+            "client_credentials.use_refresh_token": "false",
+            "saml_force_name_id_format": "false",
+            "require.pushed.authorization.requests": "false",
+            "saml.client.signature": "false",
+            "tls.client.certificate.bound.access.tokens": "false",
+            "saml.authnstatement": "false",
+            "display.on.consent.screen": "false",
+            "saml.onetimeuse.condition": "false"
+          },
+          "authenticationFlowBindingOverrides": {},
+          "fullScopeAllowed": true,
+          "nodeReRegistrationTimeout": -1,
+          "defaultClientScopes": [
+            "web-origins",
+            "roles",
+            "profile",
+            "email"
+          ],
+          "optionalClientScopes": [
+            "address",
+            "phone",
+            "offline_access",
+            "microprofile-jwt"
+          ]
+        },
+        {
           "id": "51e7e9e2-b280-41a1-9b46-1f0bd0a9620b",
           "clientId": "realm-management",
           "name": "${client_realm-management}",
@@ -1111,6 +1021,7 @@ data:
               "consentRequired": false,
               "config": {
                 "multivalued": "true",
+                "userinfo.token.claim": "true",
                 "user.attribute": "foo",
                 "id.token.claim": "true",
                 "access.token.claim": "true",
@@ -1453,6 +1364,8 @@ data:
         "strictTransportSecurity": "max-age=31536000; includeSubDomains"
       },
       "smtpServer": {},
+      "loginTheme": "base",
+      "accountTheme": "base",
       "eventsEnabled": false,
       "eventsListeners": [
         "jboss-logging"
@@ -1464,6 +1377,56 @@ data:
       "identityProviderMappers": [],
       "components": {
         "org.keycloak.services.clientregistration.policy.ClientRegistrationPolicy": [
+          {
+            "id": "e77de0c4-7151-433b-a6af-6a5ff169e664",
+            "name": "Max Clients Limit",
+            "providerId": "max-clients",
+            "subType": "anonymous",
+            "subComponents": {},
+            "config": {
+              "max-clients": [
+                "200"
+              ]
+            }
+          },
+          {
+            "id": "1ed00756-a176-46b3-8c79-4baebde8f4e8",
+            "name": "Allowed Protocol Mapper Types",
+            "providerId": "allowed-protocol-mappers",
+            "subType": "authenticated",
+            "subComponents": {},
+            "config": {
+              "allowed-protocol-mapper-types": [
+                "oidc-usermodel-attribute-mapper",
+                "oidc-address-mapper",
+                "saml-user-property-mapper",
+                "saml-user-attribute-mapper",
+                "oidc-sha256-pairwise-sub-mapper",
+                "oidc-full-name-mapper",
+                "oidc-usermodel-property-mapper",
+                "saml-role-list-mapper"
+              ]
+            }
+          },
+          {
+            "id": "c5f4b950-4f6f-4ddb-9961-9605763358c6",
+            "name": "Allowed Protocol Mapper Types",
+            "providerId": "allowed-protocol-mappers",
+            "subType": "anonymous",
+            "subComponents": {},
+            "config": {
+              "allowed-protocol-mapper-types": [
+                "oidc-full-name-mapper",
+                "saml-user-attribute-mapper",
+                "oidc-address-mapper",
+                "oidc-usermodel-attribute-mapper",
+                "saml-user-property-mapper",
+                "oidc-usermodel-property-mapper",
+                "oidc-sha256-pairwise-sub-mapper",
+                "saml-role-list-mapper"
+              ]
+            }
+          },
           {
             "id": "8e73a2b6-d924-4e6d-9f04-a4619e6481e4",
             "name": "Consent Required",
@@ -1481,18 +1444,6 @@ data:
             "config": {
               "allow-default-scopes": [
                 "true"
-              ]
-            }
-          },
-          {
-            "id": "e77de0c4-7151-433b-a6af-6a5ff169e664",
-            "name": "Max Clients Limit",
-            "providerId": "max-clients",
-            "subType": "anonymous",
-            "subComponents": {},
-            "config": {
-              "max-clients": [
-                "200"
               ]
             }
           },
@@ -1524,50 +1475,20 @@ data:
             }
           },
           {
-            "id": "1ed00756-a176-46b3-8c79-4baebde8f4e8",
-            "name": "Allowed Protocol Mapper Types",
-            "providerId": "allowed-protocol-mappers",
-            "subType": "authenticated",
-            "subComponents": {},
-            "config": {
-              "allowed-protocol-mapper-types": [
-                "saml-user-attribute-mapper",
-                "oidc-usermodel-attribute-mapper",
-                "oidc-address-mapper",
-                "saml-user-property-mapper",
-                "saml-role-list-mapper",
-                "oidc-usermodel-property-mapper",
-                "oidc-full-name-mapper",
-                "oidc-sha256-pairwise-sub-mapper"
-              ]
-            }
-          },
-          {
             "id": "94da68f3-888d-4c59-a4d0-f7fc859ff8a6",
             "name": "Full Scope Disabled",
             "providerId": "scope",
             "subType": "anonymous",
             "subComponents": {},
             "config": {}
-          },
+          }
+        ],
+        "org.keycloak.userprofile.UserProfileProvider": [
           {
-            "id": "c5f4b950-4f6f-4ddb-9961-9605763358c6",
-            "name": "Allowed Protocol Mapper Types",
-            "providerId": "allowed-protocol-mappers",
-            "subType": "anonymous",
+            "id": "611aef77-ca42-4872-9ff8-e4ae13b042f8",
+            "providerId": "declarative-user-profile",
             "subComponents": {},
-            "config": {
-              "allowed-protocol-mapper-types": [
-                "oidc-usermodel-attribute-mapper",
-                "saml-user-property-mapper",
-                "oidc-usermodel-property-mapper",
-                "oidc-sha256-pairwise-sub-mapper",
-                "oidc-address-mapper",
-                "oidc-full-name-mapper",
-                "saml-role-list-mapper",
-                "saml-user-attribute-mapper"
-              ]
-            }
+            "config": {}
           }
         ],
         "org.keycloak.keys.KeyProvider": [
@@ -1624,10 +1545,12 @@ data:
         ]
       },
       "internationalizationEnabled": false,
-      "supportedLocales": [],
+      "supportedLocales": [
+        ""
+      ],
       "authenticationFlows": [
         {
-          "id": "881909a5-7fa4-4dac-9725-e4351dc232f4",
+          "id": "9008d74d-43dd-481d-b620-65973e5a7b50",
           "alias": "Account verification options",
           "description": "Method with which to verity the existing account",
           "providerId": "basic-flow",
@@ -1653,7 +1576,7 @@ data:
           ]
         },
         {
-          "id": "28d47e4b-ef73-49a1-86dc-282b9725c859",
+          "id": "25bf425c-556a-4e3e-92fb-2563598018bd",
           "alias": "Authentication Options",
           "description": "Authentication options.",
           "providerId": "basic-flow",
@@ -1687,7 +1610,7 @@ data:
           ]
         },
         {
-          "id": "cbc43ae8-2081-4217-bc27-789807310e88",
+          "id": "d2240ec8-a226-4d7f-ad84-bf1e4839bfd7",
           "alias": "Browser - Conditional OTP",
           "description": "Flow to determine if the OTP is required for the authentication",
           "providerId": "basic-flow",
@@ -1713,7 +1636,7 @@ data:
           ]
         },
         {
-          "id": "57e65338-898e-48a1-85d1-0b8ad09b1c80",
+          "id": "7cb3500a-6dd0-4cbe-851d-526c49a9c55a",
           "alias": "Direct Grant - Conditional OTP",
           "description": "Flow to determine if the OTP is required for the authentication",
           "providerId": "basic-flow",
@@ -1739,7 +1662,7 @@ data:
           ]
         },
         {
-          "id": "68836979-471c-4833-ae5d-5075d10f1220",
+          "id": "ec3ac8ce-77bc-4876-b0d1-bebe57b87eab",
           "alias": "First broker login - Conditional OTP",
           "description": "Flow to determine if the OTP is required for the authentication",
           "providerId": "basic-flow",
@@ -1765,7 +1688,7 @@ data:
           ]
         },
         {
-          "id": "f4c4a3a2-c4bf-4b8c-8071-5cec9465dae2",
+          "id": "c3a5b244-5bc3-485c-a099-6fbc2bc6e7f0",
           "alias": "Handle Existing Account",
           "description": "Handle what to do if there is existing account with same email/username like authenticated identity provider",
           "providerId": "basic-flow",
@@ -1791,7 +1714,7 @@ data:
           ]
         },
         {
-          "id": "47921783-f586-454a-93a3-fd54e8c71e4d",
+          "id": "c9a4750d-dba9-4d76-bc0c-1e810d917f7a",
           "alias": "Reset - Conditional OTP",
           "description": "Flow to determine if the OTP should be reset or not. Set to REQUIRED to force.",
           "providerId": "basic-flow",
@@ -1817,7 +1740,7 @@ data:
           ]
         },
         {
-          "id": "51132045-d818-4382-b516-fab25f12ae40",
+          "id": "d876889b-c186-4285-8207-6b9f4e3bc5a3",
           "alias": "User creation or linking",
           "description": "Flow for the existing/non-existing user alternatives",
           "providerId": "basic-flow",
@@ -1844,7 +1767,7 @@ data:
           ]
         },
         {
-          "id": "dcac8689-e3a7-43db-b86c-f3e35df31d44",
+          "id": "3ba09d6b-d2fe-4178-9a05-b8d39c5cb835",
           "alias": "Verify Existing Account by Re-authentication",
           "description": "Reauthentication of existing account",
           "providerId": "basic-flow",
@@ -1870,7 +1793,7 @@ data:
           ]
         },
         {
-          "id": "d07a1290-cc54-4d49-a8a0-b596eb1889ba",
+          "id": "216c55d8-fe3a-412b-bcfe-a2aa2ae774c0",
           "alias": "browser",
           "description": "browser based authentication",
           "providerId": "basic-flow",
@@ -1912,7 +1835,7 @@ data:
           ]
         },
         {
-          "id": "c547b297-7a00-4ea8-8eab-693de4a7d664",
+          "id": "e989f02a-1c3e-42b6-b0f5-c919fa20a2f5",
           "alias": "clients",
           "description": "Base authentication for clients",
           "providerId": "client-flow",
@@ -1954,7 +1877,7 @@ data:
           ]
         },
         {
-          "id": "0262c1bb-0177-4694-bac5-d0a08dafe90c",
+          "id": "91f4a70f-bf50-4e8d-831c-f9a746251e8d",
           "alias": "direct grant",
           "description": "OpenID Connect Resource Owner Grant",
           "providerId": "basic-flow",
@@ -1988,7 +1911,7 @@ data:
           ]
         },
         {
-          "id": "b6cba799-543a-4dd3-9a4a-b8da10e653ea",
+          "id": "e728674e-2ba9-491a-a484-4ae9486fa2f2",
           "alias": "docker auth",
           "description": "Used by Docker clients to authenticate against the IDP",
           "providerId": "basic-flow",
@@ -2006,7 +1929,7 @@ data:
           ]
         },
         {
-          "id": "6d9de592-011f-4369-9982-f1dd4912e47e",
+          "id": "5401fbcc-648b-41cc-acaa-e1e34cde3270",
           "alias": "first broker login",
           "description": "Actions taken after first broker login with identity provider account, which is not yet linked to any Keycloak account",
           "providerId": "basic-flow",
@@ -2033,7 +1956,7 @@ data:
           ]
         },
         {
-          "id": "787a8dbf-5950-4f74-af01-b55e53e68684",
+          "id": "411d0e83-a651-4214-9959-11a8b48bb8e4",
           "alias": "forms",
           "description": "Username, password, otp and other auth forms.",
           "providerId": "basic-flow",
@@ -2059,7 +1982,7 @@ data:
           ]
         },
         {
-          "id": "b2152ef6-98d9-4de3-ad61-2aebbf454402",
+          "id": "7410cea1-e3b6-4f71-bf86-b59aeebe6010",
           "alias": "http challenge",
           "description": "An authentication flow based on challenge-response HTTP Authentication Schemes",
           "providerId": "basic-flow",
@@ -2085,7 +2008,7 @@ data:
           ]
         },
         {
-          "id": "c281ab11-3c6c-431f-b691-6c328adb4c3b",
+          "id": "9bae8ef5-09e2-4cf9-84aa-d965530b3f3e",
           "alias": "registration",
           "description": "registration flow",
           "providerId": "basic-flow",
@@ -2104,7 +2027,7 @@ data:
           ]
         },
         {
-          "id": "1ba14e0b-643b-4acb-968e-d6e9c59ba91a",
+          "id": "8521e691-d82e-476a-bec2-c8d79d211bc7",
           "alias": "registration form",
           "description": "registration form",
           "providerId": "form-flow",
@@ -2146,7 +2069,7 @@ data:
           ]
         },
         {
-          "id": "d7e45f46-dc65-4482-9502-a77125243f5a",
+          "id": "2f996441-4dec-425c-8dd1-bc0d0b86a673",
           "alias": "reset credentials",
           "description": "Reset credentials for a user if they forgot their password or something",
           "providerId": "basic-flow",
@@ -2188,7 +2111,7 @@ data:
           ]
         },
         {
-          "id": "782d309c-9a0f-413e-8217-65f158fd1073",
+          "id": "1dba9358-879e-4b9b-b9c9-de270d2d0cec",
           "alias": "saml ecp",
           "description": "SAML ECP Profile Authentication Flow",
           "providerId": "basic-flow",
@@ -2208,14 +2131,14 @@ data:
       ],
       "authenticatorConfig": [
         {
-          "id": "e5d6d6de-cad6-4d56-bb31-0920fcb5599e",
+          "id": "57c8c1e8-ec9e-455b-8642-45f5ecb35307",
           "alias": "create unique user config",
           "config": {
             "require.password.update.after.registration": "false"
           }
         },
         {
-          "id": "589cd42f-7eb5-4ea4-bd64-f1f4f8da1244",
+          "id": "4b3c704f-2933-4755-977f-584f9ccdf0c9",
           "alias": "review profile config",
           "config": {
             "update.profile.on.first.login": "missing"
@@ -2298,8 +2221,12 @@ data:
         "cibaExpiresIn": "120",
         "cibaAuthRequestedUserHint": "login_hint",
         "oauth2DeviceCodeLifespan": "600",
+        "clientOfflineSessionMaxLifespan": "0",
         "oauth2DevicePollingInterval": "5",
+        "clientSessionIdleTimeout": "0",
         "parRequestUriLifespan": "60",
+        "clientSessionMaxLifespan": "0",
+        "clientOfflineSessionIdleTimeout": "0",
         "cibaInterval": "5"
       },
       "keycloakVersion": "16.1.1",
@@ -2314,49 +2241,4 @@ data:
 kind: ConfigMap
 metadata:
   name: keycloak-configmap
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: keycloak
-spec:
-  selector:
-    app: keycloak
-  ports:
-    - protocol: TCP
-      port: 8005
-      targetPort: 8080
-  type: LoadBalancer
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: phpmyadmin
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: phpmyadmin
-  template:
-    metadata:
-      labels:
-        app: phpmyadmin
-    spec:
-      containers:
-        - name: phpmyadmin
-          image: phpmyadmin/phpmyadmin:latest
-          ports:
-            - containerPort: 80
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: phpmyadmin
-spec:
-  selector:
-    app: phpmyadmin
-  ports:
-    - protocol: TCP
-      port: 8004
-      targetPort: 80
-  type: LoadBalancer
+
